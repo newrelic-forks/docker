@@ -68,7 +68,7 @@ type bufReader struct {
 	resetTimeout         time.Duration
 	bufLenResetThreshold int64
 	maxReadDataReset     int64
-	maxRetainedBytes     int64
+	maxRetainedBytes     int
 }
 
 // NewBufReader returns a new bufReader.
