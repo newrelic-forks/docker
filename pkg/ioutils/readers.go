@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/pkg/random"
 )
 
@@ -179,8 +180,11 @@ func (r *bufReader) drain() {
 				newbuf := &bytes.Buffer{}
 
 				if r.buf.Len() > r.maxRetainedBytes {
+					discardLength := r.buf.Len() - r.maxRetainedBytes
+
 					// Throw away all but the max we'll retain
-					r.buf.Next(r.buf.Len() - r.maxRetainedBytes)
+					log.Infof("Oversized pending log buffer, discarding %d bytes", discardLength)
+					r.buf.Next(discardLength)
 				}
 
 				// Read in anything left
