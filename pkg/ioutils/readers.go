@@ -73,7 +73,7 @@ type bufReader struct {
 
 // NewBufReader returns a new bufReader.
 func NewBufReader(r io.Reader) io.ReadCloser {
-	timeout := rand.New(rndSrc).Intn(120) + 180
+	timeout := rand.New(rndSrc).Intn(15) + 30 // Cycle the drain between 30 and 45 seconds
 
 	reader := &bufReader{
 		buf:                  &bytes.Buffer{},
