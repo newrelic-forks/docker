@@ -68,6 +68,7 @@ type bufReader struct {
 	resetTimeout         time.Duration
 	bufLenResetThreshold int64
 	maxReadDataReset     int64
+	maxRetainedBytes     int64
 }
 
 // NewBufReader returns a new bufReader.
@@ -82,6 +83,7 @@ func NewBufReader(r io.Reader) io.ReadCloser {
 		resetTimeout:         time.Duration(timeout) * time.Second,
 		bufLenResetThreshold: 100 * 1024,
 		maxReadDataReset:     10 * 1024 * 1024,
+		maxRetainedBytes:     8192, // Max we'll retain when truncating on overflow
 		reader:               r,
 	}
 	reader.wait.L = &reader.Mutex
@@ -175,7 +177,19 @@ func (r *bufReader) drain() {
 			// reset all counters.
 			if reset {
 				newbuf := &bytes.Buffer{}
+
+				if r.buf.Len() > r.maxRetainedBytes {
+					// Throw away all but the max we'll retain
+					r.buf.Next(r.buf.Len() - r.maxRetainedBytes)
+				}
+
+				// Read in anything left
 				newbuf.ReadFrom(r.buf)
+
+				// Truncate the old buf now, don't wait for GC
+				r.buf.Reset()
+
+				// Swap the buffer
 				r.buf = newbuf
 				lastReset = now
 				reset = false
