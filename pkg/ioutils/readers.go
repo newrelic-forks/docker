@@ -84,7 +84,7 @@ func NewBufReader(r io.Reader) io.ReadCloser {
 		resetTimeout:         time.Duration(timeout) * time.Second,
 		bufLenResetThreshold: 100 * 1024,
 		maxReadDataReset:     10 * 1024 * 1024,
-		maxRetainedBytes:     8192, // Max we'll retain when truncating on overflow
+		maxRetainedBytes:     1024 * 1024, // Max we'll retain when truncating on overflow (1MB)
 		reader:               r,
 	}
 	reader.wait.L = &reader.Mutex
